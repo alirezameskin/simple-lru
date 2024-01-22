@@ -43,8 +43,6 @@ class LRUList[K, V](val capacity: Int) {
 
   /**
    * Returns an immutable list of the items in the list.
-   *
-   * @return
    */
   def toList: immutable.List[(K, V)] = immutable.List.from(evictList.iterator.map(e => (e.key, e.value)))
 

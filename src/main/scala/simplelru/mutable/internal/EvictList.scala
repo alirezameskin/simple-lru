@@ -1,5 +1,6 @@
 package simplelru.mutable.internal
 
+import java.util.ConcurrentModificationException
 import scala.collection.AbstractIterator
 
 /**
@@ -14,6 +15,7 @@ private[simplelru] class EvictList[K, V] {
   private var size = 0
   private var first: Entry[K, V] = null
   private var last: Entry[K, V] = null
+  @transient private[this] var mutationCount = 0
 
   /**
    * Returns the number of items in the list.
@@ -32,15 +34,23 @@ private[simplelru] class EvictList[K, V] {
 
   /**
    * Iterates over the items in the list.
+   *
+   * @throws ConcurrentModificationException
+   *   if the list is mutated during iteration
    */
-  def iterator: Iterator[Entry[K, V]] = new AbstractIterator[Entry[K, V]] {
-    private[this] var current = first
+  def iterator: Iterator[Entry[K, V]] = new MutationTracker.CheckedIterator[Entry[K, V]](this.iterator, mutationCount)
+
+  /**
+   * Iterates over the items in the list.
+   */
+  private def actualIterator: Iterator[Entry[K, V]] = new AbstractIterator[Entry[K, V]] {
+    private[this] var current = last
 
     def hasNext: Boolean = current != null
 
     def next(): Entry[K, V] = {
       val r = current;
-      current = current.next;
+      current = current.prev;
       r
     }
   }
@@ -49,6 +59,7 @@ private[simplelru] class EvictList[K, V] {
    * Pushes a new entry to the front of the list.
    */
   def pushFront(key: K, value: V): Entry[K, V] = {
+    mutationCount += 1
     val f = first
     val entry = Entry(key, value, null, f)
     first = entry
@@ -70,6 +81,7 @@ private[simplelru] class EvictList[K, V] {
       // already in front
     } else if (entry eq last) {
       // last element
+      mutationCount += 1
       val f = first
 
       last = entry.prev
@@ -79,6 +91,7 @@ private[simplelru] class EvictList[K, V] {
       f.prev = entry
     } else {
       // middle element
+      mutationCount += 1
       val f = first
       val next = entry.next
       val prev = entry.prev
@@ -95,6 +108,7 @@ private[simplelru] class EvictList[K, V] {
    * Removes an entry from the list.
    */
   def remove(entry: Entry[K, V]): Unit = {
+    mutationCount += 1
     if (entry eq first) {
       first = entry.next
     } else {
@@ -119,6 +133,7 @@ private[simplelru] class EvictList[K, V] {
       None
     } else if (size == 1) {
       // only one element
+      mutationCount += 1
       val f = first
       first = null
       last = null
@@ -126,6 +141,7 @@ private[simplelru] class EvictList[K, V] {
       Some(f)
     } else {
       // more than one element
+      mutationCount += 1
       size -= 1
       val l = last
       last = l.prev
