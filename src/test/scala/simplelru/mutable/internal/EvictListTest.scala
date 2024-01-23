@@ -3,7 +3,7 @@ package simplelru.mutable.internal
 import org.scalacheck.Prop.forAll
 import org.scalacheck.{Gen, Properties}
 
-object EvictListTest extends Properties("EvictList") {
+object EvictListTest extends Properties("simplelru.mutable.internal.EvictList") {
   property("add") = forAll((key: String, value: Int) => {
     val list = EvictList.empty[String, Int]
     list.pushFront(key, value)

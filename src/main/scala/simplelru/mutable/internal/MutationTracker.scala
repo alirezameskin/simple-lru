@@ -14,7 +14,7 @@ import scala.collection.AbstractIterator
  * [[MutationTracker.checkMutations() `checkMutations`]] and
  * [[MutationTracker.checkMutationsForIteration() `checkMutationsForIteration`]] methods.
  */
-private object MutationTracker {
+private[mutable] object MutationTracker {
 
   /**
    * Checks whether or not the actual mutation count differs from the expected one, throwing an exception, if it does.

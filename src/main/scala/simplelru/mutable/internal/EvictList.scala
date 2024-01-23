@@ -11,7 +11,7 @@ import scala.collection.AbstractIterator
  * @tparam V
  *   the value type
  */
-private[simplelru] class EvictList[K, V] {
+private[mutable] class EvictList[K, V] {
   private var size = 0
   private var first: Entry[K, V] = null
   private var last: Entry[K, V] = null
@@ -38,19 +38,20 @@ private[simplelru] class EvictList[K, V] {
    * @throws ConcurrentModificationException
    *   if the list is mutated during iteration
    */
-  def iterator: Iterator[Entry[K, V]] = new MutationTracker.CheckedIterator[Entry[K, V]](this.iterator, mutationCount)
+  def iterator: Iterator[Entry[K, V]] =
+    new MutationTracker.CheckedIterator[Entry[K, V]](this.actualIterator, mutationCount)
 
   /**
    * Iterates over the items in the list.
    */
   private def actualIterator: Iterator[Entry[K, V]] = new AbstractIterator[Entry[K, V]] {
-    private[this] var current = last
+    private[this] var current = first
 
     def hasNext: Boolean = current != null
 
     def next(): Entry[K, V] = {
       val r = current;
-      current = current.prev;
+      current = current.next;
       r
     }
   }
@@ -151,7 +152,7 @@ private[simplelru] class EvictList[K, V] {
 
 }
 
-object EvictList {
+private[mutable] object EvictList {
 
   /**
    * Creates a new empty EvictList.

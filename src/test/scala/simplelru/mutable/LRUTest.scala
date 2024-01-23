@@ -3,10 +3,10 @@ package simplelru.mutable
 import org.scalacheck.Prop.forAll
 import org.scalacheck.{Gen, Properties}
 
-object LRUListTest extends Properties("LRUList") {
+object LRUTest extends Properties("mutable.LRU") {
 
   property("should fill up to capacity") = forAll(Gen.choose(10, 100)) { count =>
-    val lru = LRUList[String, Int](10)
+    val lru = LRU[String, Int](10)
     Range.inclusive(0, count).foreach { i =>
       lru.add(s"key$i", i)
     }
@@ -15,7 +15,7 @@ object LRUListTest extends Properties("LRUList") {
   }
 
   property("should accessing an item should move it to the front of the list") = forAll(Gen.choose(10, 100)) { count =>
-    val lru = LRUList[String, Int](10)
+    val lru = LRU[String, Int](10)
     Range.inclusive(0, count).foreach { i =>
       lru.add(s"key$i", i)
     }
@@ -26,7 +26,7 @@ object LRUListTest extends Properties("LRUList") {
   }
 
   property("contains methods should be true only for the recent items") = forAll(Gen.choose(40, 100)) { count =>
-    val lru = LRUList[String, Int](10)
+    val lru = LRU[String, Int](10)
     Range.inclusive(0, count).foreach { i =>
       lru.add(s"key$i", i)
     }
@@ -36,7 +36,7 @@ object LRUListTest extends Properties("LRUList") {
   }
 
   property("peek methods should not move an item to the front of the list") = forAll(Gen.choose(10, 100)) { count =>
-    val lru = LRUList[String, Int](10)
+    val lru = LRU[String, Int](10)
     Range.inclusive(0, count).foreach { i =>
       lru.add(s"key$i", i)
     }
@@ -47,7 +47,7 @@ object LRUListTest extends Properties("LRUList") {
   }
 
   property("removeOldest method should remove the oldest item in the list") = forAll { (_: Int) =>
-    val lru = LRUList[String, Int](10)
+    val lru = LRU[String, Int](10)
     Range.inclusive(0, 200).foreach { i =>
       lru.add(s"key$i", i)
     }
@@ -58,7 +58,7 @@ object LRUListTest extends Properties("LRUList") {
   }
 
   property("remove method should remove the item from the list") = forAll(Gen.choose(20, 200)) { count =>
-    val lru = LRUList[String, Int](10)
+    val lru = LRU[String, Int](10)
     Range.inclusive(0, count).foreach { i =>
       lru.add(s"key$i", i)
     }
