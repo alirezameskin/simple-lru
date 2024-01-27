@@ -66,6 +66,13 @@ trait LRU[K, V] {
    * Removes an item from the LRU. Returns the new LRU, and the value removed if the key was present.
    */
   def remove(key: K): (LRU[K, V], Option[V])
+
+  /**
+   * Returns an iterator over the items in the list.
+   *
+   * @return
+   */
+  def iterator: Iterator[(K, V)]
 }
 
 object LRU {

@@ -1,7 +1,7 @@
 package simplelru
 package mutable
 
-import simplelru.mutable.internal.LRUImpl
+import simplelru.mutable.internal.{BlockingLRU, LRUImpl}
 
 import scala.collection.immutable
 
@@ -34,12 +34,7 @@ trait LRU[K, V] {
    *
    * @return
    */
-  def iterator: Iterator[V]
-
-  /**
-   * Returns an immutable list of the items in the list.
-   */
-  def toList: immutable.List[(K, V)]
+  def iterator: Iterator[(K, V)]
 
   /**
    * Add adds a value to the list. Returns true if an eviction occurred.
@@ -119,5 +114,23 @@ trait LRU[K, V] {
 }
 
 object LRU {
-  def apply[K, V](capacity: Int): LRU[K, V] = new LRUImpl[K, V](capacity)
+
+  /**
+   * Returns a mutable LRU implementation that is not thread-safe.
+   * @param capacity
+   * @tparam K
+   * @tparam V
+   * @return
+   */
+  def apply[K, V](capacity: Int): LRU[K, V] = LRUImpl[K, V](capacity)
+
+  /**
+   * Returns a blocking LRU cache implementation.
+   *
+   * @param capacity
+   * @tparam K
+   * @tparam V
+   * @return
+   */
+  def blocking[K, V](capacity: Int): LRU[K, V] = BlockingLRU(LRUImpl(capacity))
 }

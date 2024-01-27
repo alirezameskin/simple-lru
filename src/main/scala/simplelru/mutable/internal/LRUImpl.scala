@@ -12,9 +12,7 @@ private[mutable] class LRUImpl[K, V](val capacity: Int) extends LRU[K, V] {
 
   override def isEmpty: Boolean = items.isEmpty
 
-  override def iterator: Iterator[V] = evictList.iterator.map(_.value)
-
-  override def toList: immutable.List[(K, V)] = immutable.List.from(evictList.iterator.map(e => (e.key, e.value)))
+  override def iterator: Iterator[(K, V)] = evictList.iterator.map(e => (e.key, e.value))
 
   override def add(key: K, value: V): Boolean =
     items.get(key) match {
@@ -83,4 +81,8 @@ private[mutable] class LRUImpl[K, V](val capacity: Int) extends LRU[K, V] {
 
   override def backOption: Option[V] =
     evictList.backOption.map(_.value)
+}
+
+object LRUImpl {
+  def apply[K, V](capacity: Int): LRUImpl[K, V] = new LRUImpl(capacity)
 }

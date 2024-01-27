@@ -3,7 +3,7 @@ package simplelru.immutable.internal
 import simplelru.immutable.LRU
 import simplelru.immutable.internal.LRUImpl._
 
-final private[immutable] case class LRUImpl[K, V](first: Option[K],
+final private[simplelru] case class LRUImpl[K, V](first: Option[K],
                                                   last: Option[K],
                                                   items: Map[K, Entry[K, V]],
                                                   capacity: Int
@@ -51,6 +51,20 @@ final private[immutable] case class LRUImpl[K, V](first: Option[K],
 
   override def remove(key: K): (LRU[K, V], Option[V]) =
     removeFromList(this, key)
+
+  override def iterator: Iterator[(K, V)] = {
+    def loop(key: Option[K]): Iterator[(K, V)] =
+      key match {
+        case None => Iterator.empty
+        case Some(k) =>
+          items.get(k) match {
+            case None        => Iterator.empty
+            case Some(entry) => Iterator.single((k, entry.value)) ++ loop(entry.next)
+          }
+      }
+
+    loop(first)
+  }
 }
 
 private[immutable] object LRUImpl {
